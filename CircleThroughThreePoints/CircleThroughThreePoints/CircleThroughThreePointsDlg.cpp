@@ -58,10 +58,10 @@ CCircleThroughThreePointsDlg::CCircleThroughThreePointsDlg(CWnd* pParent /*=null
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
-	m_bDragging = FALSE;
-	m_inPointRadius = 0; // 추후 수정
-	m_inLineThickness = 0; // 추후 수정
-	m_inDragPointIndex = -1;
+	m_bDragging			= FALSE;
+	m_inPointRadius		= 0;
+	m_inLineThickness	= 0;
+	m_inDragPointIndex	= -1;
 }
 
 void CCircleThroughThreePointsDlg::DoDataExchange(CDataExchange* pDX)
@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CCircleThroughThreePointsDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_BN_CLICKED(IDC_BUTTON_THICK, &CCircleThroughThreePointsDlg::OnBnClickedButtonThick)
 	ON_BN_CLICKED(IDC_BUTTON_RESET, &CCircleThroughThreePointsDlg::OnBnClickedButtonReset)
+	ON_BN_CLICKED(IDC_BUTTON_RANDOM, &CCircleThroughThreePointsDlg::OnBnClickedButtonRandom)
 END_MESSAGE_MAP()
 
 
@@ -158,8 +159,6 @@ void CCircleThroughThreePointsDlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 void CCircleThroughThreePointsDlg::OnPaint()
 {
-	
-
 	if (IsIconic())
 	{
 		CPaintDC dc(this); // device context for painting
@@ -168,9 +167,9 @@ void CCircleThroughThreePointsDlg::OnPaint()
 	{
 		CClientDC dc(this);
 		m_image.Draw(dc, 0, 0);
+
 		CDialogEx::OnPaint();
 	}
-
 }
 
 
@@ -183,7 +182,6 @@ HCURSOR CCircleThroughThreePointsDlg::OnQueryDragIcon()
 
 void CCircleThroughThreePointsDlg::SetMainCanvas(int nWidth, int nHeight)
 {
-
 	m_image.Create(nWidth, -nHeight, 8);
 
 	static RGBQUAD rgb[256];
@@ -196,7 +194,6 @@ void CCircleThroughThreePointsDlg::SetMainCanvas(int nWidth, int nHeight)
 	m_image.SetColorTable(0, 256, rgb);
 
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
-
 	memset(fm, 0xff, sizeof(unsigned char) * nWidth * nHeight);
 
 }
@@ -207,11 +204,8 @@ void CCircleThroughThreePointsDlg::UpdateDisplay()
 	m_image.Draw(dc, 0, 0);
 }
 
-
-
-void CCircleThroughThreePointsDlg::DrawRandomThreeCircle(unsigned char* fm, int nRadius, int nGray)
+void CCircleThroughThreePointsDlg::DrawRandomThreePoints(unsigned char* fm)
 {
-
 	int nWidth = m_image.GetWidth();
 	int nHeight = m_image.GetHeight();
 
@@ -219,17 +213,16 @@ void CCircleThroughThreePointsDlg::DrawRandomThreeCircle(unsigned char* fm, int 
 	memset(fm, 0xff, sizeof(unsigned char) * nWidth * nHeight);
 	m_vecPoints.clear(); 
 
-	for (int i = 0; i < m_vecPoints.size(); i++)
+	for (int i = 0; i < MAX_POINT_COUNT; i++)
 	{
 		int inRandX = rand() % nWidth;
 		int inRandY = rand() % nHeight;
 
-		m_vecPoints[i].x = inRandX;
-		m_vecPoints[i].y = inRandY;
+		m_vecPoints.push_back(CPoint(inRandX, inRandY));
 	}
 
 	DrawAllPoints(fm);
-	//DrawCircleThroughThreePoints(fm);
+	DrawCircleThroughThreePoints(fm);
 
 	DisplayPointsInfo();
 	UpdateDisplay();
@@ -265,8 +258,6 @@ void CCircleThroughThreePointsDlg::DrawPoint(unsigned char* fm, int centerX, int
 			}
 		}
 	}
-
-
 
 }
 
@@ -327,7 +318,6 @@ void CCircleThroughThreePointsDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	if (m_inLineThickness == 0 || m_inPointRadius == 0)
 	{
 		AfxMessageBox(_T("반지름, 두께 정보를 입력해주세요."));
-		//::MessageBox(AfxGetMainWnd()->GetSafeHwnd(), _T("반지름, 두께 정보를 입력해주세요."), _T("확인"), MB_OK | MB_TOPMOST);
 		return;
 	}
 		
@@ -384,11 +374,10 @@ void CCircleThroughThreePointsDlg::OnMouseMove(UINT nFlags, CPoint point)
 		memset(fm, 0xff, sizeof(unsigned char) * nWidth * nHeight);
 
 		// 세점과 지나는 원 다시 그리기 
-
 		m_vecPoints[m_inDragPointIndex] = point;
+
 		DrawAllPoints(fm);
 		DrawCircleThroughThreePoints(fm);
-
 		DisplayPointsInfo();
 		UpdateDisplay();
 	}
@@ -471,7 +460,7 @@ BOOL CCircleThroughThreePointsDlg::SolveCircleCenter(CPoint A, CPoint B, CPoint 
 
 void CCircleThroughThreePointsDlg::OnBnClickedButtonRadius()
 {
-	// m_inPointRadius 값 저장
+	// PointRadius 값 저장
 	
 	int inRadius = 0;
 	CString csRadius = _T("");
@@ -487,15 +476,13 @@ void CCircleThroughThreePointsDlg::OnBnClickedButtonRadius()
 			return;
 		}
 
-
 		m_inPointRadius = inRadius;
 	}
-
 }
 
 void CCircleThroughThreePointsDlg::OnBnClickedButtonThick()
 {
-	// m_inLineThickness 값 저장
+	// LineThickness 값 저장
 	
 	int inThickness = 0;
 	CString csThickness = _T("");
@@ -512,7 +499,6 @@ void CCircleThroughThreePointsDlg::OnBnClickedButtonThick()
 		}
 
 		m_inLineThickness = inThickness;
-
 	}
 }
 
@@ -522,7 +508,7 @@ void CCircleThroughThreePointsDlg::OnBnClickedButtonReset()
 	int nHeight = m_image.GetHeight();
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
 
-	// 초기화 함수 생성
+	// 초기화
 	memset(fm, 0xff, sizeof(unsigned char) * nWidth * nHeight);
 	m_vecPoints.clear();
 
@@ -543,4 +529,24 @@ void CCircleThroughThreePointsDlg::DisplayPointsInfo()
 		GetDlgItem(IDC_STATIC_POINTINFO1 + i)->SetWindowTextW(csTmp);
 	}
 
+}
+void CCircleThroughThreePointsDlg::OnBnClickedButtonRandom()
+{
+	std::thread _thread0(threadDrawRandomPoints, this);
+	_thread0.detach();
+}
+
+
+void CCircleThroughThreePointsDlg::threadDrawRandomPoints(CWnd* pParent)
+{
+	CCircleThroughThreePointsDlg* pWnd = (CCircleThroughThreePointsDlg*)pParent;
+
+	unsigned char* fm = (unsigned char*)pWnd->m_image.GetBits();
+
+	for (int i = 0; i < 10; i++)
+	{
+		pWnd->DrawRandomThreePoints(fm);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
 }

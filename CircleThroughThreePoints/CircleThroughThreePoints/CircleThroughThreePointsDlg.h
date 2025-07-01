@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <cmath>
+#include <thread>
 
 using namespace std;
 
@@ -36,23 +37,26 @@ public:
 
 	BOOL m_bDragging;
 	
+
+
 	void SetMainCanvas(int nWidth, int nHeight);
 	void UpdateDisplay();
 
-	void DrawRandomThreeCircle(unsigned char* fm, int nRadius, int nGray);
-	void DrawPoint(unsigned char* fm, int centerX, int centerY, int nRadius = 10, int nGray = 80); // 함수 이름 바꾸자 Points
+	void DrawPoint(unsigned char* fm, int centerX, int centerY, int nRadius = 10, int nGray = 80);
+	void DrawAllPoints(unsigned char* fm);
+	void DrawRandomThreePoints(unsigned char* fm);
+
 	void DrawCircleLine(unsigned char* fm, int centerX, int centerY, int nRadius, int nThickness, int nGray);
 	BOOL DrawCircleThroughThreePoints(unsigned char* fm);
-
-	void DrawAllPoints(unsigned char* fm);
-
 	BOOL SolveCircleCenter(CPoint A, CPoint B, CPoint C, CPoint& center, double& radius);
+
 	BOOL ValidImgPos(int x, int y);
 
-
 	int GetClickedPointIndex(CPoint point);
-
 	void DisplayPointsInfo();
+
+	static void threadDrawRandomPoints(CWnd* pParent);
+
 protected:
 	HICON m_hIcon;
 	CImage m_image;
@@ -70,4 +74,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnBnClickedButtonThick();
 	afx_msg void OnBnClickedButtonReset();
+	afx_msg void OnBnClickedButtonRandom();
 };
